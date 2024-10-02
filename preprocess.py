@@ -31,8 +31,8 @@ class LJDatasets(Dataset):
         return len(self.landmarks_frame)
 
     def __getitem__(self, idx):
-        wav_name = os.path.join(self.root_dir, self.landmarks_frame.ix[idx, 0]) + '.wav'
-        text = self.landmarks_frame.ix[idx, 1]
+        wav_name = os.path.join(self.root_dir, self.landmarks_frame.iloc[idx, 0]) + '.wav'
+        text = self.landmarks_frame.iloc[idx, 1]
 
         text = np.asarray(text_to_sequence(text, [hp.cleaners]), dtype=np.int32)
         mel = np.load(wav_name[:-4] + '.pt.npy')
@@ -62,7 +62,7 @@ class PostDatasets(Dataset):
         return len(self.landmarks_frame)
 
     def __getitem__(self, idx):
-        wav_name = os.path.join(self.root_dir, self.landmarks_frame.ix[idx, 0]) + '.wav'
+        wav_name = os.path.join(self.root_dir, self.landmarks_frame.iloc[idx, 0]) + '.wav'
         mel = np.load(wav_name[:-4] + '.pt.npy')
         mag = np.load(wav_name[:-4] + '.mag.npy')
         sample = {'mel':mel, 'mag':mag}
@@ -72,7 +72,7 @@ class PostDatasets(Dataset):
 def collate_fn_transformer(batch):
 
     # Puts each data field into a tensor with outer dimension batch size
-    if isinstance(batch[0], collections.Mapping):
+    if isinstance(batch[0], collections.abc.Mapping):
 
         text = [d['text'] for d in batch]
         mel = [d['mel'] for d in batch]
