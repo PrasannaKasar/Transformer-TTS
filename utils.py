@@ -4,51 +4,52 @@ import os, copy
 from scipy import signal
 import hyperparams as hp
 import torch as t
+import numpy as np
+import librosa
 
 def get_spectrograms(fpath):
     '''Parse the wave file in `fpath` and
     Returns normalized melspectrogram and linear spectrogram.
     Args:
       fpath: A string. The full path of a sound file.
+      hp: An object containing hyperparameters.
     Returns:
-      mel: A 2d array of shape (T, n_mels) and dtype of float32.
-      mag: A 2d array of shape (T, 1+n_fft/2) and dtype of float32.
+      mel: A 2D array of shape (T, n_mels) and dtype of float32.
+      mag: A 2D array of shape (T, 1+n_fft/2) and dtype of float32.
     '''
-    # Loading sound file
+    # Load audio file
     y, sr = librosa.load(fpath, sr=hp.sr)
 
-    # Trimming
+    # Trim leading and trailing silence
     y, _ = librosa.effects.trim(y)
 
     # Preemphasis
     y = np.append(y[0], y[1:] - hp.preemphasis * y[:-1])
 
-    # stft
-    linear = librosa.stft(y=y,
-                          n_fft=hp.n_fft,
-                          hop_length=hp.hop_length,
-                          win_length=hp.win_length)
+    # Compute the Mel spectrogram
+    mel_spectrogram = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=hp.n_mels, n_fft=hp.n_fft, hop_length=hp.hop_length)
 
-    # magnitude spectrogram
-    mag = np.abs(linear)  # (1+n_fft//2, T)
+    # Convert to decibels
+    mel_spectrogram_db = librosa.power_to_db(mel_spectrogram, ref=np.max)
 
-    # mel spectrogram
-    mel_basis = librosa.filters.mel(hp.sr, hp.n_fft, hp.n_mels)  # (n_mels, 1+n_fft//2)
-    mel = np.dot(mel_basis, mag)  # (n_mels, t)
+    # Normalize Mel spectrogram
+    mel_spectrogram_db = np.clip((mel_spectrogram_db - hp.ref_db + hp.max_db) / hp.max_db, 1e-8, 1)
+    mel_spectrogram_db = mel_spectrogram_db.T.astype(np.float32)  # Transpose to (T, n_mels)
 
-    # to decibel
-    mel = 20 * np.log10(np.maximum(1e-5, mel))
-    mag = 20 * np.log10(np.maximum(1e-5, mag))
+    # Compute the STFT
+    D = librosa.stft(y, n_fft=hp.n_fft, hop_length=hp.hop_length)
 
-    # normalize
-    mel = np.clip((mel - hp.ref_db + hp.max_db) / hp.max_db, 1e-8, 1)
-    mag = np.clip((mag - hp.ref_db + hp.max_db) / hp.max_db, 1e-8, 1)
+    # Calculate the magnitude spectrum
+    magnitude_spectrum = np.abs(D)
 
-    # Transpose
-    mel = mel.T.astype(np.float32)  # (T, n_mels)
-    mag = mag.T.astype(np.float32)  # (T, 1+n_fft//2)
+    # Convert magnitude spectrum to dB
+    magnitude_spectrum_db = 20 * np.log10(np.maximum(1e-5, magnitude_spectrum))
 
-    return mel, mag
+    # Normalize magnitude spectrum
+    magnitude_spectrum_db = np.clip((magnitude_spectrum_db - hp.ref_db + hp.max_db) / hp.max_db, 1e-8, 1)
+    magnitude_spectrum_db = magnitude_spectrum_db.T.astype(np.float32)  # Transpose to (T, 1+n_fft/2)
+    # print(f'mel_spec shape = {mel_spectrogram_db.shape}, mag_spec shape = {magnitude_spectrum_db.shape}')
+    return mel_spectrogram_db, magnitude_spectrum_db
 
 def spectrogram2wav(mag):
     '''# Generate wave file from linear magnitude spectrogram
