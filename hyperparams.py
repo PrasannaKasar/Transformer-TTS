@@ -14,12 +14,12 @@ n_mels = 80 # Number of Mel banks to generate
 power = 1.2 # Exponent for amplifying the predicted magnitude
 min_level_db = -100
 ref_level_db = 20
-hidden_size = 256
-embedding_size = 512
+hidden_size = 64
+embedding_size = 128
 max_db = 100
 ref_db = 20
     
-n_iter = 60
+n_iter = 30
 # power = 1.5
 outputs_per_step = 1
 
