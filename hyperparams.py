@@ -1,13 +1,22 @@
 # Audio
-num_mels = 80
+# num_mels = 80
 # num_freq = 1024
-n_fft = 2048
-sr = 22050
+# n_fft = 2048
+# sr = 22050
 # frame_length_ms = 50.
 # frame_shift_ms = 12.5
 preemphasis = 0.97
-frame_shift = 0.0125 # seconds
-frame_length = 0.05 # seconds
+# frame_shift = 0.0125 # seconds
+# frame_length = 0.05 # seconds
+
+# Adjusted Audio parameters
+num_mels = 60  # Reduced number of mel bins
+n_fft = 1024   # Reduced FFT size
+sr = 22050
+frame_length = 0.04  # Reduced frame length
+frame_shift = 0.015  # Increased frame shift
+
+
 hop_length = int(sr*frame_shift) # samples.
 win_length = int(sr*frame_length) # samples.
 n_mels = 80 # Number of Mel banks to generate
