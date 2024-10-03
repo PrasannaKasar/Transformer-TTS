@@ -1,7 +1,7 @@
 # Audio
-num_mels = 80
-num_freq = 1024
-n_fft = 2048
+num_mels = 60
+# num_freq = 1024
+n_fft = 1024
 sr = 22050
 # frame_length_ms = 50.
 # frame_shift_ms = 12.5
