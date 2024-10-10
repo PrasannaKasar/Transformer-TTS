@@ -17,10 +17,9 @@ def adjust_learning_rate(optimizer, step_num, warmup_step=4000):
 
 def test(model, test_loader, writer, epoch):
     model.eval()
-    pbar = tqdm(test_loader)
     test_loss = 0.0
     with torch.no_grad():
-        for i, data in enumerate(pbar):
+        for i, data in enumerate(test_loader):
             character, mel, mel_input, pos_text, pos_mel, _ = data
             character = character.to(device)
             mel = mel.to(device)
