@@ -15,33 +15,31 @@ def adjust_learning_rate(optimizer, step_num, warmup_step=4000):
     for param_group in optimizer.param_groups:
         param_group['lr'] = lr
 
-def test(model, test_loader):
-    model.eval()  # Set model to evaluation mode
+def test(model, test_loader, writer, epoch):
+    model.eval()
+    pbar = tqdm(test_loader)
     test_loss = 0.0
-    with torch.no_grad():  # Disable gradient calculation
-        for i, data in enumerate(test_loader):
+    with torch.no_grad():
+        for i, data in enumerate(pbar):
             character, mel, mel_input, pos_text, pos_mel, _ = data
-            
-            # Move inputs to the device (GPU or CPU)
             character = character.to(device)
             mel = mel.to(device)
             mel_input = mel_input.to(device)
             pos_text = pos_text.to(device)
             pos_mel = pos_mel.to(device)
             
-            # Forward pass: compute predictions
             mel_pred, postnet_pred, attn_probs, stop_preds, attns_enc, attns_dec = model(character, mel_input, pos_text, pos_mel)
 
-            # Compute losses
             mel_loss = nn.L1Loss()(mel_pred, mel)
             post_mel_loss = nn.L1Loss()(postnet_pred, mel)
-            
-            # Total loss
+
             loss = mel_loss + post_mel_loss
             test_loss += loss.item()
 
-    # Average loss over all test batches
     avg_test_loss = test_loss / len(test_loader)
+    writer.add_scalars('test_loss_per_epoch',{
+                    'loss':avg_test_loss
+                }, epoch)
     print(f"Test Loss: {avg_test_loss}")    
 
 def main():
@@ -143,9 +141,12 @@ def main():
                                 os.path.join(hp.checkpoint_path,'checkpoint_transformer_%d.pth.tar' % global_step))
                 
         avg_loss = epoch_loss / len(train_loader)
+        writer.add_scalars('training_loss_per_epoch',{
+                    'loss':avg_loss,
+                }, epoch)
         print(f"Loss at epoch {epoch} = {avg_loss}")
 
-        test(m, test_loader)
+        test(m, test_loader, writer, epoch)
 
 
 if __name__ == '__main__':
