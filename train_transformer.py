@@ -21,6 +21,7 @@ def test(model, test_loader, writer, epoch):
     with torch.no_grad():
         for i, data in enumerate(test_loader):
             character, mel, mel_input, pos_text, pos_mel, _ = data
+            pos_mel.to(device)
             stop_tokens = t.abs(pos_mel.ne(0).type(t.float) - 1).to(device)
             character = character.to(device)
             mel = mel.to(device)
@@ -32,12 +33,11 @@ def test(model, test_loader, writer, epoch):
             stop_preds = stop_preds.squeeze(-1)
             mel_loss = nn.L1Loss()(mel_pred, mel)
             post_mel_loss = nn.L1Loss()(postnet_pred, mel)
-            # positive_weight = 6.0
-            # criterion = nn.BCEWithLogitsLoss(pos_weight=torch.tensor([positive_weight]))
-            # stop_tokens_loss = criterion(stop_preds, stop_tokens)
+            positive_weight = 6.0
+            criterion = nn.BCEWithLogitsLoss(pos_weight=torch.tensor([positive_weight]))
+            stop_tokens_loss = criterion(stop_preds, stop_tokens)
             
-            loss = mel_loss + post_mel_loss
-            # + stop_tokens_loss
+            loss = mel_loss + post_mel_loss + stop_tokens_loss
             test_loss += loss.item()
 
     avg_test_loss = test_loss / len(test_loader)
@@ -76,7 +76,7 @@ def main():
                 adjust_learning_rate(optimizer, global_step)
                 
             character, mel, mel_input, pos_text, pos_mel, _ = data
-            
+            pos_mel.to(device)
             stop_tokens = t.abs(pos_mel.ne(0).type(t.float) - 1).to(device)
             
             character = character.to(device)
@@ -89,18 +89,17 @@ def main():
             stop_preds = stop_preds.squeeze(-1)
             mel_loss = nn.L1Loss()(mel_pred, mel)
             post_mel_loss = nn.L1Loss()(postnet_pred, mel)
-            # positive_weight = 6.0
-            # criterion = nn.BCEWithLogitsLoss(pos_weight=torch.tensor([positive_weight]))
-            # stop_token_loss = criterion(stop_preds, stop_tokens)
+            positive_weight = 6.0
+            criterion = nn.BCEWithLogitsLoss(pos_weight=torch.tensor([positive_weight]))
+            stop_token_loss = criterion(stop_preds, stop_tokens)
             
-            loss = mel_loss + post_mel_loss
-            # + stop_tokens_loss
+            loss = mel_loss + post_mel_loss + stop_tokens_loss
             epoch_loss += loss.item()
             writer.add_scalars('training_loss',{
                     'mel_loss':mel_loss,
-                    'post_mel_loss':post_mel_loss
+                    'post_mel_loss':post_mel_loss,
+                    'stop_token_loss': stop_token_loss
                 }, global_step)
-                # 'stop_token_loss': stop_token_loss
             writer.add_scalars('alphas',{
                     'encoder_alpha':m.module.encoder.alpha.data,
                     'decoder_alpha':m.module.decoder.alpha.data,
