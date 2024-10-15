@@ -98,10 +98,9 @@ def main():
             epoch_loss += loss.item()
             writer.add_scalars('training_loss',{
                     'mel_loss':mel_loss,
-                    'post_mel_loss':post_mel_loss,
-                    'stop_token_loss': stop_token_loss
+                    'post_mel_loss':post_mel_loss
                 }, global_step)
-                
+                # 'stop_token_loss': stop_token_loss
             writer.add_scalars('alphas',{
                     'encoder_alpha':m.module.encoder.alpha.data,
                     'decoder_alpha':m.module.decoder.alpha.data,
