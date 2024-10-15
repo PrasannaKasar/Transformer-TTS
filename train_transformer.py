@@ -34,7 +34,7 @@ def test(model, test_loader, writer, epoch):
             mel_loss = nn.L1Loss()(mel_pred, mel)
             post_mel_loss = nn.L1Loss()(postnet_pred, mel)
             positive_weight = 6.0
-            criterion = nn.BCEWithLogitsLoss(pos_weight=torch.tensor([positive_weight]))
+            criterion = nn.BCEWithLogitsLoss(pos_weight=torch.tensor([positive_weight]).to(device))
             stop_tokens_loss = criterion(stop_preds, stop_tokens)
             
             loss = mel_loss + post_mel_loss + stop_tokens_loss
@@ -90,7 +90,7 @@ def main():
             mel_loss = nn.L1Loss()(mel_pred, mel)
             post_mel_loss = nn.L1Loss()(postnet_pred, mel)
             positive_weight = 6.0
-            criterion = nn.BCEWithLogitsLoss(pos_weight=torch.tensor([positive_weight]))
+            criterion = nn.BCEWithLogitsLoss(pos_weight=torch.tensor([positive_weight]).to(device))
             stop_token_loss = criterion(stop_preds, stop_tokens)
             
             loss = mel_loss + post_mel_loss + stop_tokens_loss
