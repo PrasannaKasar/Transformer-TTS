@@ -73,7 +73,8 @@ def main():
             character, mel, mel_input, pos_text, pos_mel, _ = data
             
             stop_tokens = t.abs(pos_mel.ne(0).type(t.float) - 1)
-            print(f"stop_tokens shape = {stop_tokens.shape}")
+            print(f"stop_tokens[0] = {torch.count_nonzero(stop_tokens[0])}")
+            print(f"stop_tokens[1] = {torch.count_nonzero(stop_tokens[1])}")
             
             character = character.to(device)
             mel = mel.to(device)
