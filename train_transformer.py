@@ -90,7 +90,7 @@ def main():
             post_mel_loss = nn.L1Loss()(postnet_pred, mel)
             positive_weight = 6.0
             criterion = nn.BCEWithLogitsLoss(pos_weight=torch.tensor([positive_weight]))
-            stop_tokens_loss = criterion(stop_preds, stop_tokens)
+            stop_token_loss = criterion(stop_preds, stop_tokens)
             
             loss = mel_loss + post_mel_loss + stop_tokens_loss
             epoch_loss += loss.item()
