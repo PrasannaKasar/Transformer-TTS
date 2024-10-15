@@ -21,7 +21,7 @@ def test(model, test_loader, writer, epoch):
     with torch.no_grad():
         for i, data in enumerate(test_loader):
             character, mel, mel_input, pos_text, pos_mel, _ = data
-            stop_tokens = t.abs(pos_mel.ne(0).type(t.float) - 1)
+            stop_tokens = t.abs(pos_mel.ne(0).type(t.float) - 1).to(device)
             character = character.to(device)
             mel = mel.to(device)
             mel_input = mel_input.to(device)
@@ -76,7 +76,7 @@ def main():
                 
             character, mel, mel_input, pos_text, pos_mel, _ = data
             
-            stop_tokens = t.abs(pos_mel.ne(0).type(t.float) - 1)
+            stop_tokens = t.abs(pos_mel.ne(0).type(t.float) - 1).to(device)
             
             character = character.to(device)
             mel = mel.to(device)
