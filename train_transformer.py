@@ -21,6 +21,7 @@ def test(model, test_loader, writer, epoch):
     with torch.no_grad():
         for i, data in enumerate(test_loader):
             character, mel, mel_input, pos_text, pos_mel, _ = data
+            stop_tokens = t.abs(pos_mel.ne(0).type(t.float) - 1)
             character = character.to(device)
             mel = mel.to(device)
             mel_input = mel_input.to(device)
@@ -31,8 +32,11 @@ def test(model, test_loader, writer, epoch):
 
             mel_loss = nn.L1Loss()(mel_pred, mel)
             post_mel_loss = nn.L1Loss()(postnet_pred, mel)
-
-            loss = mel_loss + post_mel_loss
+            positive_weight = 6.0
+            criterion = nn.BCEWithLogitsLoss(pos_weight=torch.tensor([positive_weight]))
+            stop_tokens_loss = criterion(stop_preds, stop_tokens)
+            
+            loss = mel_loss + post_mel_loss + stop_tokens_loss
             test_loss += loss.item()
 
     avg_test_loss = test_loss / len(test_loader)
@@ -73,8 +77,6 @@ def main():
             character, mel, mel_input, pos_text, pos_mel, _ = data
             
             stop_tokens = t.abs(pos_mel.ne(0).type(t.float) - 1)
-            print(f"stop_tokens[0] = {stop_tokens[0]}")
-            # print(f"stop_tokens[1] = {torch.count_nonzero(stop_tokens[1])}")
             
             character = character.to(device)
             mel = mel.to(device)
@@ -86,13 +88,16 @@ def main():
 
             mel_loss = nn.L1Loss()(mel_pred, mel)
             post_mel_loss = nn.L1Loss()(postnet_pred, mel)
+            positive_weight = 6.0
+            criterion = nn.BCEWithLogitsLoss(pos_weight=torch.tensor([positive_weight]))
+            stop_tokens_loss = criterion(stop_preds, stop_tokens)
             
-            loss = mel_loss + post_mel_loss
+            loss = mel_loss + post_mel_loss + stop_tokens_loss
             epoch_loss += loss.item()
             writer.add_scalars('training_loss',{
                     'mel_loss':mel_loss,
                     'post_mel_loss':post_mel_loss,
-
+                    'stop_token_loss': stop_token_loss
                 }, global_step)
                 
             writer.add_scalars('alphas',{
