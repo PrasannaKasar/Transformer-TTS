@@ -29,7 +29,7 @@ def test(model, test_loader, writer, epoch):
             pos_mel = pos_mel.to(device)
             
             mel_pred, postnet_pred, attn_probs, stop_preds, attns_enc, attns_dec = model(character, mel_input, pos_text, pos_mel)
-
+            stop_preds = stop_preds.squeeze(-1)
             mel_loss = nn.L1Loss()(mel_pred, mel)
             post_mel_loss = nn.L1Loss()(postnet_pred, mel)
             positive_weight = 6.0
@@ -85,7 +85,7 @@ def main():
             pos_mel = pos_mel.to(device)
             
             mel_pred, postnet_pred, attn_probs, stop_preds, attns_enc, attns_dec = m.forward(character, mel_input, pos_text, pos_mel)
-
+            stop_preds = stop_preds.squeeze(-1)
             mel_loss = nn.L1Loss()(mel_pred, mel)
             post_mel_loss = nn.L1Loss()(postnet_pred, mel)
             positive_weight = 6.0
