@@ -80,7 +80,7 @@ def main():
             pos_mel.to(device)
             stop_tokens = torch.abs(pos_mel.ne(0).type(t.float) - 1).to(device)
             print(mel[0].shape)
-            print(mel[0][0])
+            print(mel[0][len(mel[0])-1])
             character = character.to(device)
             mel = mel.to(device)
             mel_input = mel_input.to(device)
