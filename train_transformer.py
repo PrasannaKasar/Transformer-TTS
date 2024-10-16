@@ -34,7 +34,7 @@ def test(model, test_loader, writer, epoch):
             mel_loss = nn.L1Loss()(mel_pred, mel)
             post_mel_loss = nn.L1Loss()(postnet_pred, mel)
             criterion = nn.BCEWithLogitsLoss()
-            stop_token_loss = criterion(stop_preds, stop_tokens) * 5.0
+            stop_token_loss = criterion(stop_preds, stop_tokens) * 20.0
             
             loss = mel_loss + post_mel_loss + stop_token_loss
             test_loss += loss.item()
