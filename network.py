@@ -18,8 +18,8 @@ class Encoder(nn.Module):
                                                     freeze=True)
         self.pos_dropout = nn.Dropout(p=0.1)
         self.encoder_prenet = EncoderPrenet(embedding_size, num_hidden)
-        self.layers = clones(Attention(num_hidden), 3)
-        self.ffns = clones(FFN(num_hidden), 3)
+        self.layers = clones(Attention(num_hidden), 6)
+        self.ffns = clones(FFN(num_hidden), 6)
 
     def forward(self, x, pos):
 
@@ -67,9 +67,9 @@ class MelDecoder(nn.Module):
         self.decoder_prenet = Prenet(hp.num_mels, num_hidden * 2, num_hidden, p=0.2)
         self.norm = Linear(num_hidden, num_hidden)
 
-        self.selfattn_layers = clones(Attention(num_hidden), 3)
-        self.dotattn_layers = clones(Attention(num_hidden), 3)
-        self.ffns = clones(FFN(num_hidden), 3)
+        self.selfattn_layers = clones(Attention(num_hidden), 6)
+        self.dotattn_layers = clones(Attention(num_hidden), 6)
+        self.ffns = clones(FFN(num_hidden), 6)
         self.mel_linear = Linear(num_hidden, hp.num_mels * hp.outputs_per_step)
         self.stop_linear = Linear(num_hidden, 1, w_init='sigmoid')
 
