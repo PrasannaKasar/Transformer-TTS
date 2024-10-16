@@ -84,7 +84,7 @@ def main():
             mel_input = mel_input.to(device)
             pos_text = pos_text.to(device)
             pos_mel = pos_mel.to(device)
-            print(stop_tokens[0])
+            # print(stop_tokens[0])
             mel_pred, postnet_pred, attn_probs, stop_preds, attns_enc, attns_dec = m.forward(character, mel_input, pos_text, pos_mel)
             stop_preds = stop_preds.squeeze(-1)
             mel_loss = nn.L1Loss()(mel_pred, mel)
