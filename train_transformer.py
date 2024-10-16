@@ -79,14 +79,14 @@ def main():
             character, mel, mel_input, pos_text, pos_mel, _ = data
             pos_mel.to(device)
             stop_tokens = torch.abs(pos_mel.ne(0).type(t.float) - 1).to(device)
-            print(mel[0].shape)
-            print(mel[0][len(mel[0])-1])
+            # print(mel[0].shape)
+            # print(mel[0][len(mel[0])-1])
             character = character.to(device)
             mel = mel.to(device)
             mel_input = mel_input.to(device)
             pos_text = pos_text.to(device)
             pos_mel = pos_mel.to(device)
-            
+            print(stop_tokens.shape)
             mel_pred, postnet_pred, attn_probs, stop_preds, attns_enc, attns_dec = m.forward(character, mel_input, pos_text, pos_mel)
             stop_preds = stop_preds.squeeze(-1)
             mel_loss = nn.L1Loss()(mel_pred, mel)
