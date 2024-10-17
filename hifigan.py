@@ -54,7 +54,7 @@ def synthesis(text, args):
     # Generate waveform using HiFi-GAN
     # wav = generate_audio_with_hifigan(mag_pred)
     # Write output WAV file
-    torch.save(postnet_pred, '5k_postnet_mel.pt')
+    torch.save(postnet_pred, '13k_postnet_mel.pt')
     # write(hp.sample_path + "/test.wav", hp.sr, wav)
 
 def convert_to_mel_spectrogram(mag_pred):
