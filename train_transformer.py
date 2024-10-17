@@ -88,8 +88,8 @@ def main():
             # print(stop_tokens[0])
             mel_pred, postnet_pred, attn_probs, stop_preds, attns_enc, attns_dec = m.forward(character, mel_input, pos_text, pos_mel)
             stop_preds = stop_preds.squeeze(-1)
-            mel_loss = nn.L1Loss()(mel_pred, mel)
-            post_mel_loss = nn.L1Loss()(postnet_pred, mel)
+            mel_loss = nn.nn.MSELoss()(mel_pred, mel)
+            post_mel_loss = nn.nn.MSELoss()(postnet_pred, mel)
             criterion = nn.BCEWithLogitsLoss()
             # stop_token_loss = criterion(stop_preds, stop_tokens) * 50.0
             
