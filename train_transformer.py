@@ -34,9 +34,10 @@ def test(model, test_loader, writer, epoch):
             mel_loss = nn.L1Loss()(mel_pred, mel)
             post_mel_loss = nn.L1Loss()(postnet_pred, mel)
             criterion = nn.BCEWithLogitsLoss()
-            stop_token_loss = criterion(stop_preds, stop_tokens) * 50.0
+            # stop_token_loss = criterion(stop_preds, stop_tokens) * 50.0
             
-            loss = mel_loss + post_mel_loss + stop_token_loss
+            loss = mel_loss + post_mel_loss
+            # + stop_token_loss
             test_loss += loss.item()
 
     avg_test_loss = test_loss / len(test_loader)
@@ -90,14 +91,15 @@ def main():
             mel_loss = nn.L1Loss()(mel_pred, mel)
             post_mel_loss = nn.L1Loss()(postnet_pred, mel)
             criterion = nn.BCEWithLogitsLoss()
-            stop_token_loss = criterion(stop_preds, stop_tokens) * 50.0
+            # stop_token_loss = criterion(stop_preds, stop_tokens) * 50.0
             
-            loss = mel_loss + post_mel_loss + stop_token_loss
+            loss = mel_loss + post_mel_loss
+            # + stop_token_loss
             epoch_loss += loss.item()
             writer.add_scalars('training_loss',{
                     'mel_loss':mel_loss,
-                    'post_mel_loss':post_mel_loss,
-                    'stop_token_loss': stop_token_loss
+                    'post_mel_loss':post_mel_loss
+                    # 'stop_token_loss': stop_token_loss
                 }, global_step)
             writer.add_scalars('alphas',{
                     'encoder_alpha':m.module.encoder.alpha.data,
