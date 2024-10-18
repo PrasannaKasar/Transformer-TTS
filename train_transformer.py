@@ -46,7 +46,7 @@ def test(model, test_loader, writer, epoch):
             stop_preds = stop_preds.squeeze(-1)
 
             # Assuming attention_matrices is of shape (4 * batch_size, max_output_len, max_input_len)
-            attn_matrix = attn_matrix.view(hp.batch_size, 4, len(output_lengths), len(input_lengths))
+            attn_matrix = attn_matrix.view(hp.batch_size, 4, max(output_lengths), max(input_lengths))
             # You can then average over the heads or use another aggregation method
             attn_matrix = attn_matrix.mean(dim=1)  # Shape: (batch_size, max_output_len, max_input_len)
 
@@ -150,7 +150,7 @@ def main():
             stop_preds = stop_preds.squeeze(-1)
 
             # Assuming attention_matrices is of shape (4 * batch_size, max_output_len, max_input_len)
-            attn_matrix = attn_matrix.view(hp.batch_size, 4, len(output_lengths), len(input_lengths))
+            attn_matrix = attn_matrix.view(hp.batch_size, 4, max(output_lengths), max(input_lengths))
             # You can then average over the heads or use another aggregation method
             attn_matrix = attn_matrix.mean(dim=1)  # Shape: (batch_size, max_output_len, max_input_len)
 
