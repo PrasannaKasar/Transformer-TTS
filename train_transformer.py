@@ -95,8 +95,8 @@ def main():
             input_lengths = torch.sum(character != 0, dim=1).to(device)
             output_lengths = torch.sum(mel != 0, dim=1).to(device)
             output_lengths = output_lengths[:, 0]
-            print(input_lengths.shape)
-            print(output_lengths.shape)
+            # print(input_lengths.shape)
+            # print(output_lengths.shape)
             stop_preds = stop_preds.squeeze(-1)
 
             total_attn_loss = 0.0
@@ -115,6 +115,9 @@ def main():
                 
                 # Slice the attention matrix for the valid part (before padding)
                 attn_slice = attn_matrix[b, :T, :N]  # Shape: [T, N]
+                print("W shape:", W.shape)
+                print("attn_slice shape:", attn_slice.shape)
+
                 
                 # Compute the attention loss for this batch item
                 attn_loss = torch.mean(W * attn_slice)
