@@ -94,6 +94,8 @@ def main():
             attn_matrix = attn_probs[-1]
             input_lengths = torch.sum(character != 0, dim=1).to(device)
             output_lengths = torch.sum(mel != 0, dim=1).to(device)
+            print(input_lengths.shape)
+            print(output_lengths.shape)
             stop_preds = stop_preds.squeeze(-1)
 
             total_attn_loss = 0.0
