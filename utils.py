@@ -131,10 +131,9 @@ def get_sinusoid_encoding_table(n_position, d_hid, padding_idx=None):
 
 def guided_attention(N, T, g=0.2):
     '''Guided attention. Refer to page 3 on the paper.'''
-    W = np.zeros((N, T), dtype=np.float32)
-    for n_pos in range(W.shape[0]):
-        for t_pos in range(W.shape[1]):
-            W[n_pos, t_pos] = 1 - np.exp(-(t_pos / float(T) - n_pos / float(N)) ** 2 / (2 * g * g))
+    n_positions = np.arange(N)[:, np.newaxis]  # Shape: [N, 1]
+    t_positions = np.arange(T)[np.newaxis, :]  # Shape: [1, T]
+    W = 1 - np.exp(-((t_positions / T) - (n_positions / N)) ** 2 / (2 * g * g))
     return W
 
 def guided_attention_loss(attn_probs, input_lengths, output_lengths, sigma=0.2):
