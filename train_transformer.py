@@ -75,7 +75,7 @@ def test(model, test_loader, writer, epoch):
             # Average the total attention loss across the batch
             total_attn_loss = total_attn_loss / attn_matrix.size(0)  # Normalize by batch size
             
-            mel_loss = nn.L1MSELoss()(mel_pred, mel)
+            mel_loss = nn.L1Loss()(mel_pred, mel)
             post_mel_loss = nn.L1Loss()(postnet_pred, mel)
             criterion = nn.BCEWithLogitsLoss()
             # attn_loss = guided_attention(attn_matrix, input_lengths, output_lengths)
