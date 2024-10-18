@@ -45,10 +45,16 @@ def test(model, test_loader, writer, epoch):
             # print(output_lengths.shape)
             stop_preds = stop_preds.squeeze(-1)
 
+            # Assuming attention_matrices is of shape (4 * batch_size, max_output_len, max_input_len)
+            attn_matrix = attn_matrix.view(hp.batch_size, 4, output_lengths, input_lengths)
+            # You can then average over the heads or use another aggregation method
+            attn_matrix = attn_matrix.mean(dim=1)  # Shape: (batch_size, max_output_len, max_input_len)
+
+
             total_attn_loss = 0.0
     
             # Guided attention: Compute attention loss for each example in the batch
-            for b in range(attn_matrix.size(0)//4):  # Iterate over batch size
+            for b in range(attn_matrix.size(0)):  # Iterate over batch size
                 # Get the true input and output lengths for this batch item
                 N = input_lengths[b].item()  # Input length (characters or phonemes)
                 T = output_lengths[b].item()  # Output length (mel frames)
@@ -73,14 +79,14 @@ def test(model, test_loader, writer, epoch):
                 total_attn_loss += attn_loss
             
             # Average the total attention loss across the batch
-            total_attn_loss = total_attn_loss / (attn_matrix.size(0)//4)  # Normalize by batch size
+            total_attn_loss = total_attn_loss / attn_matrix.size(0)  # Normalize by batch size
             
             mel_loss = nn.MSELoss()(mel_pred, mel)
             post_mel_loss = nn.MSELoss()(postnet_pred, mel)
             criterion = nn.BCEWithLogitsLoss()
             # attn_loss = guided_attention(attn_matrix, input_lengths, output_lengths)
             # stop_token_loss = criterion(stop_preds, stop_tokens) * 8.0
-            lamda = 2
+            lamda = 0.1
             loss = mel_loss + post_mel_loss + lamda * total_attn_loss 
             # + stop_token_loss
             test_loss += loss.item()
@@ -143,10 +149,15 @@ def main():
             # print(output_lengths.shape)
             stop_preds = stop_preds.squeeze(-1)
 
+            # Assuming attention_matrices is of shape (4 * batch_size, max_output_len, max_input_len)
+            attn_matrix = attn_matrix.view(hp.batch_size, 4, output_lengths, input_lengths)
+            # You can then average over the heads or use another aggregation method
+            attn_matrix = attn_matrix.mean(dim=1)  # Shape: (batch_size, max_output_len, max_input_len)
+
             total_attn_loss = 0.0
     
             # Guided attention: Compute attention loss for each example in the batch
-            for b in range(attn_matrix.size(0)//4):  # Iterate over batch size
+            for b in range(attn_matrix.size(0)):  # Iterate over batch size
                 # Get the true input and output lengths for this batch item
                 N = input_lengths[b].item()  # Input length (characters or phonemes)
                 T = output_lengths[b].item()  # Output length (mel frames)
@@ -171,14 +182,14 @@ def main():
                 total_attn_loss += attn_loss
             
             # Average the total attention loss across the batch
-            total_attn_loss = total_attn_loss / (attn_matrix.size(0)//4)  # Normalize by batch size
+            total_attn_loss = total_attn_loss / attn_matrix.size(0)  # Normalize by batch size
             
             mel_loss = nn.MSELoss()(mel_pred, mel)
             post_mel_loss = nn.MSELoss()(postnet_pred, mel)
             criterion = nn.BCEWithLogitsLoss()
             # attn_loss = guided_attention(attn_matrix, input_lengths, output_lengths)
             # stop_token_loss = criterion(stop_preds, stop_tokens) * 8.0
-            lamda = 2
+            lamda = 0.1
             loss = mel_loss + post_mel_loss + lamda * total_attn_loss
             # + stop_token_loss
             epoch_loss += loss.item()
