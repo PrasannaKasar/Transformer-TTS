@@ -46,7 +46,7 @@ def test(model, test_loader, writer, epoch):
             stop_preds = stop_preds.squeeze(-1)
 
             # Assuming attention_matrices is of shape (4 * batch_size, max_output_len, max_input_len)
-            print(attn_matrix.shape)
+            # print(attn_matrix.shape)
             attn_matrix = attn_matrix.view(hp.batch_size, 4, max(output_lengths), max(input_lengths))
             # You can then average over the heads or use another aggregation method
             attn_matrix = attn_matrix.mean(dim=1)  # Shape: (batch_size, max_output_len, max_input_len)
@@ -118,7 +118,7 @@ def main():
     for epoch in range(hp.epochs):
 
         train_loader = DataLoader(train_dataset, batch_size=hp.batch_size, shuffle=True, collate_fn=collate_fn_transformer, drop_last=True, num_workers=4)
-        test_loader = DataLoader(test_dataset, batch_size=hp.batch_size, shuffle=False, collate_fn=collate_fn_transformer, drop_last=False, num_workers=4)
+        test_loader = DataLoader(test_dataset, batch_size=hp.batch_size, shuffle=False, collate_fn=collate_fn_transformer, drop_last=True, num_workers=4)
         pbar = tqdm(train_loader)
         epoch_loss = 0
         for i, data in enumerate(pbar):
