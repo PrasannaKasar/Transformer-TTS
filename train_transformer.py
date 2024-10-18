@@ -7,6 +7,7 @@ from tqdm import tqdm
 import torch
 import torch.nn as nn
 from torch.utils.data import random_split, DataLoader
+from utils import *
 
 device = 'cuda'
 
@@ -87,22 +88,26 @@ def main():
             pos_mel = pos_mel.to(device)
             # print(stop_tokens[0])
             mel_pred, postnet_pred, attn_probs, stop_preds, attns_enc, attns_dec = m.forward(character, mel_input, pos_text, pos_mel)
-            print(type(attn_probs))   # Check if it's a list
-            print(len(attn_probs))    # Check how many elements are in the list
-            print(attn_probs[0].shape)  # Print the shape of the first attention matrix
-
+            # print(type(attn_probs))   # Check if it's a list
+            # print(len(attn_probs))    # Check how many elements are in the list
+            # print(attn_probs[0].shape)  # Print the shape of the first attention matrix
+            attn_matrix = attn_probs[-1]
+            input_lengths = torch.sum(character != 0, dim=1).to(device)
+            output_lengths = torch.sum(mel != 0, dim=1).to(device)
             stop_preds = stop_preds.squeeze(-1)
             mel_loss = nn.MSELoss()(mel_pred, mel)
             post_mel_loss = nn.MSELoss()(postnet_pred, mel)
             criterion = nn.BCEWithLogitsLoss()
+            attn_loss = guided_attention_loss(attn_matrix, input_lengths, output_lengths)
             # stop_token_loss = criterion(stop_preds, stop_tokens) * 50.0
-            
-            loss = mel_loss + post_mel_loss
+            lamda = 0.1
+            loss = mel_loss + post_mel_loss + lamda * attn_loss
             # + stop_token_loss
             epoch_loss += loss.item()
             writer.add_scalars('training_loss',{
                     'mel_loss':mel_loss,
-                    'post_mel_loss':post_mel_loss
+                    'post_mel_loss':post_mel_loss,
+                    'attn_loss':attn_loss
                     # 'stop_token_loss': stop_token_loss
                 }, global_step)
             writer.add_scalars('alphas',{
