@@ -21,11 +21,7 @@ def test(model, test_loader, writer, epoch):
     test_loss = 0.0
     with torch.no_grad():
         for i, data in enumerate(test_loader):
-            pbar.set_description("Processing at epoch %d"%epoch)
-            global_step += 1
-            if global_step < 400000:
-                adjust_learning_rate(optimizer, global_step)
-                
+            # pbar.set_description("Processing at epoch %d"%epoch)
             character, mel, mel_input, pos_text, pos_mel, _ = data
             pos_mel.to(device)
             stop_tokens = torch.abs(pos_mel.ne(0).type(t.float) - 1).to(device)
