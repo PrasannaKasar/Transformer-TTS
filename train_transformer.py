@@ -111,10 +111,10 @@ def main():
                 W = guided_attention(N, T, g=0.2)  # Use the function you found
                 
                 # Convert W to a torch tensor and move it to the appropriate device
-                W = torch.tensor(W).to(attn_probs.device)  # Shape: [T, N]
+                W = torch.tensor(W).to(attn_matrix.device)  # Shape: [T, N]
                 
                 # Slice the attention matrix for the valid part (before padding)
-                attn_slice = attn_probs[b, :T, :N]  # Shape: [T, N]
+                attn_slice = attn_matrix[b, :T, :N]  # Shape: [T, N]
                 
                 # Compute the attention loss for this batch item
                 attn_loss = torch.mean(W * attn_slice)
