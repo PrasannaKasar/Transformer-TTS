@@ -95,19 +95,46 @@ def main():
             input_lengths = torch.sum(character != 0, dim=1).to(device)
             output_lengths = torch.sum(mel != 0, dim=1).to(device)
             stop_preds = stop_preds.squeeze(-1)
+
+            total_attn_loss = 0.0
+    
+            # Guided attention: Compute attention loss for each example in the batch
+            for b in range(attn_matrix.size(0)):  # Iterate over batch size
+                # Get the true input and output lengths for this batch item
+                N = input_lengths[b].item()  # Input length (characters or phonemes)
+                T = output_lengths[b].item()  # Output length (mel frames)
+                
+                # Compute the guided attention weight matrix for this example
+                W = guided_attention(N, T, g=0.2)  # Use the function you found
+                
+                # Convert W to a torch tensor and move it to the appropriate device
+                W = torch.tensor(W).to(attn_probs.device)  # Shape: [T, N]
+                
+                # Slice the attention matrix for the valid part (before padding)
+                attn_slice = attn_probs[b, :T, :N]  # Shape: [T, N]
+                
+                # Compute the attention loss for this batch item
+                attn_loss = torch.mean(W * attn_slice)
+                
+                # Accumulate the total attention loss across the batch
+                total_attn_loss += attn_loss
+            
+            # Average the total attention loss across the batch
+            total_attn_loss = total_attn_loss / attn_matrix.size(0)  # Normalize by batch size
+            
             mel_loss = nn.MSELoss()(mel_pred, mel)
             post_mel_loss = nn.MSELoss()(postnet_pred, mel)
             criterion = nn.BCEWithLogitsLoss()
             attn_loss = guided_attention_loss(attn_matrix, input_lengths, output_lengths)
             # stop_token_loss = criterion(stop_preds, stop_tokens) * 50.0
             lamda = 0.1
-            loss = mel_loss + post_mel_loss + lamda * attn_loss
+            loss = mel_loss + post_mel_loss + lamda * total_attn_loss
             # + stop_token_loss
             epoch_loss += loss.item()
             writer.add_scalars('training_loss',{
                     'mel_loss':mel_loss,
                     'post_mel_loss':post_mel_loss,
-                    'attn_loss':attn_loss
+                    'total_attn_loss':total_attn_loss
                     # 'stop_token_loss': stop_token_loss
                 }, global_step)
             writer.add_scalars('alphas',{
