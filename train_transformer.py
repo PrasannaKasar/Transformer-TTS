@@ -87,7 +87,10 @@ def main():
             pos_mel = pos_mel.to(device)
             # print(stop_tokens[0])
             mel_pred, postnet_pred, attn_probs, stop_preds, attns_enc, attns_dec = m.forward(character, mel_input, pos_text, pos_mel)
-            print(attn_probs.shape)
+            print(type(attn_probs))   # Check if it's a list
+            print(len(attn_probs))    # Check how many elements are in the list
+            print(attn_probs[0].shape)  # Print the shape of the first attention matrix
+
             stop_preds = stop_preds.squeeze(-1)
             mel_loss = nn.MSELoss()(mel_pred, mel)
             post_mel_loss = nn.MSELoss()(postnet_pred, mel)
