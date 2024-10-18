@@ -116,8 +116,8 @@ def main():
                 # Slice the attention matrix for the valid part (before padding)
                 attn_slice = attn_matrix[b, :T, :N]  # Shape: [T, N]
                 attn_slice = attn_slice.T
-                print("W shape:", W.shape)
-                print("attn_slice shape:", attn_slice.shape)
+                # print("W shape:", W.shape)
+                # print("attn_slice shape:", attn_slice.shape)
 
                 
                 # Compute the attention loss for this batch item
