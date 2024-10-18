@@ -33,7 +33,7 @@ def test(model, test_loader, writer, epoch):
             pos_text = pos_text.to(device)
             pos_mel = pos_mel.to(device)
             # print(stop_tokens[0])
-            mel_pred, postnet_pred, attn_probs, stop_preds, attns_enc, attns_dec = m.forward(character, mel_input, pos_text, pos_mel)
+            mel_pred, postnet_pred, attn_probs, stop_preds, attns_enc, attns_dec = model.forward(character, mel_input, pos_text, pos_mel)
             # print(type(attn_probs))   # Check if it's a list
             # print(len(attn_probs))    # Check how many elements are in the list
             # print(attn_probs[0].shape)  # Print the shape of the first attention matrix
