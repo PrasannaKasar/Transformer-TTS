@@ -132,7 +132,7 @@ def main():
             mel_loss = nn.MSELoss()(mel_pred, mel)
             post_mel_loss = nn.MSELoss()(postnet_pred, mel)
             criterion = nn.BCEWithLogitsLoss()
-            attn_loss = guided_attention_loss(attn_matrix, input_lengths, output_lengths)
+            attn_loss = guided_attention(attn_matrix, input_lengths, output_lengths)
             # stop_token_loss = criterion(stop_preds, stop_tokens) * 50.0
             lamda = 0.1
             loss = mel_loss + post_mel_loss + lamda * total_attn_loss
