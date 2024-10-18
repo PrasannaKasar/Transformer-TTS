@@ -16,35 +16,71 @@ def adjust_learning_rate(optimizer, step_num, warmup_step=4000):
         param_group['lr'] = lr
 
 def test(model, test_loader, writer, epoch):
-    model.eval()
+    model.eval()  # Set model to evaluation mode
     test_loss = 0.0
-    with torch.no_grad():
+    total_attn_loss = 0.0  # Track total attention loss
+
+    with torch.no_grad():  # Disable gradient computation
         for i, data in enumerate(test_loader):
             character, mel, mel_input, pos_text, pos_mel, _ = data
-            pos_mel.to(device)
-            stop_tokens = torch.abs(pos_mel.ne(0).type(t.float) - 1).to(device)
+            
+            # Move data to the device
             character = character.to(device)
             mel = mel.to(device)
             mel_input = mel_input.to(device)
             pos_text = pos_text.to(device)
             pos_mel = pos_mel.to(device)
             
+            # Calculate stop tokens (1 for stop, 0 for continue)
+            stop_tokens = torch.abs(pos_mel.ne(0).type(torch.float) - 1).to(device)
+
+            # Forward pass through the model
             mel_pred, postnet_pred, attn_probs, stop_preds, attns_enc, attns_dec = model(character, mel_input, pos_text, pos_mel)
-            stop_preds = stop_preds.squeeze(-1)
-            mel_loss = nn.MSELoss()(mel_pred, mel)
-            post_mel_loss = nn.MSELoss()(postnet_pred, mel)
-            criterion = nn.BCEWithLogitsLoss()
-            # stop_token_loss = criterion(stop_preds, stop_tokens) * 50.0
+
+            # Calculate input and output lengths
+            input_lengths = torch.sum(character != 0, dim=1).to(device)  # True input lengths
+            output_lengths = torch.sum(mel != 0, dim=1).to(device)  # True output lengths
+
+            # Calculate losses
+            mel_loss = nn.MSELoss()(mel_pred, mel)  # Mel-spectrogram loss
+            post_mel_loss = nn.MSELoss()(postnet_pred, mel)  # Post-mel loss
+
+            # Calculate guided attention loss
+            for b in range(attn_probs.size(0)):  # Iterate over batch size
+                N = input_lengths[b].item()  # Actual input length for this batch item
+                T = output_lengths[b].item()  # Actual output length for this batch item
+                
+                # Compute the guided attention weight matrix
+                W = guided_attention(N, T, g=0.2)  # Use the function you provided
+                
+                # Convert W to a tensor and move it to the appropriate device
+                W = torch.tensor(W).to(attn_probs.device)  # Shape: [T, N]
+                
+                # Slice the attention matrix for the valid part
+                attn_slice = attn_probs[b, :T, :N]  # Shape: [T, N]
+                
+                # Compute the attention loss for this batch item
+                attn_loss = torch.mean(W * attn_slice)  # Weighted average
+                
+                # Accumulate the total attention loss
+                total_attn_loss += attn_loss.item()
+
+            # Combine all losses
+            total_loss = mel_loss + post_mel_loss + (0.1 * total_attn_loss)  # Adjust the weight of attention loss as needed
             
-            loss = mel_loss + post_mel_loss
-            # + stop_token_loss
-            test_loss += loss.item()
+            # Accumulate the test loss
+            test_loss += total_loss.item()
 
     avg_test_loss = test_loss / len(test_loader)
-    writer.add_scalars('test_loss_per_epoch',{
-                    'loss':avg_test_loss
-                }, epoch)
-    print(f"Test Loss: {avg_test_loss}")    
+    avg_attn_loss = total_attn_loss / len(test_loader)  # Average attention loss
+
+    # Log the losses
+    writer.add_scalars('test_loss_per_epoch', {
+        'loss': avg_test_loss,
+        'attention_loss': avg_attn_loss
+    }, epoch)
+
+    print(f"Test Loss: {avg_test_loss}, Average Attention Loss: {avg_attn_loss}")
 
 def main():
 
