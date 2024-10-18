@@ -75,12 +75,12 @@ def test(model, test_loader, writer, epoch):
             # Average the total attention loss across the batch
             total_attn_loss = total_attn_loss / attn_matrix.size(0)  # Normalize by batch size
             
-            mel_loss = nn.L1Loss()(mel_pred, mel)
-            post_mel_loss = nn.L1Loss()(postnet_pred, mel)
+            mel_loss = nn.MSELoss()(mel_pred, mel)
+            post_mel_loss = nn.MSELoss()(postnet_pred, mel)
             criterion = nn.BCEWithLogitsLoss()
             # attn_loss = guided_attention(attn_matrix, input_lengths, output_lengths)
             # stop_token_loss = criterion(stop_preds, stop_tokens) * 8.0
-            lamda = 0.2
+            lamda = 0.1
             loss = mel_loss + post_mel_loss + lamda * total_attn_loss 
             # + stop_token_loss
             test_loss += loss.item()
@@ -173,12 +173,12 @@ def main():
             # Average the total attention loss across the batch
             total_attn_loss = total_attn_loss / attn_matrix.size(0)  # Normalize by batch size
             
-            mel_loss = nn.L1Loss()(mel_pred, mel)
-            post_mel_loss = nn.L1Loss()(postnet_pred, mel)
+            mel_loss = nn.MSELoss()(mel_pred, mel)
+            post_mel_loss = nn.MSELoss()(postnet_pred, mel)
             criterion = nn.BCEWithLogitsLoss()
             # attn_loss = guided_attention(attn_matrix, input_lengths, output_lengths)
             # stop_token_loss = criterion(stop_preds, stop_tokens) * 8.0
-            lamda = 0.2
+            lamda = 0.1
             loss = mel_loss + post_mel_loss + lamda * total_attn_loss
             # + stop_token_loss
             epoch_loss += loss.item()
