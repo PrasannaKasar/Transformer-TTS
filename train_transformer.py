@@ -68,7 +68,8 @@ def test(model, test_loader, writer, epoch):
                 
                 # Slice the attention matrix for the valid part (before padding)
                 attn_slice = attn_matrix[b, :T, :N]  # Shape: [T, N]
-                attn_slice = attn_slice.T
+                # attn_slice = attn_slice.T
+                W = W.T
                 # print("W shape:", W.shape)
                 # print("attn_slice shape:", attn_slice.shape)
 
@@ -87,7 +88,7 @@ def test(model, test_loader, writer, epoch):
             criterion = nn.BCEWithLogitsLoss()
             # attn_loss = guided_attention(attn_matrix, input_lengths, output_lengths)
             # stop_token_loss = criterion(stop_preds, stop_tokens) * 8.0
-            lamda = 0.1
+            lamda = 0.2
             loss = mel_loss + post_mel_loss + lamda * total_attn_loss 
             # + stop_token_loss
             test_loss += loss.item()
@@ -171,7 +172,8 @@ def main():
                 
                 # Slice the attention matrix for the valid part (before padding)
                 attn_slice = attn_matrix[b, :T, :N]  # Shape: [T, N]
-                attn_slice = attn_slice.T
+                # attn_slice = attn_slice.T
+                W = W.T
                 # print("W shape:", W.shape)
                 # print("attn_slice shape:", attn_slice.shape)
 
@@ -190,7 +192,7 @@ def main():
             criterion = nn.BCEWithLogitsLoss()
             # attn_loss = guided_attention(attn_matrix, input_lengths, output_lengths)
             # stop_token_loss = criterion(stop_preds, stop_tokens) * 8.0
-            lamda = 0.1
+            lamda = 0.2
             loss = mel_loss + post_mel_loss + lamda * total_attn_loss
             # + stop_token_loss
             epoch_loss += loss.item()
