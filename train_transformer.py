@@ -84,7 +84,7 @@ def test(model, test_loader, writer, epoch):
             criterion = nn.BCEWithLogitsLoss()
             # attn_loss = guided_attention(attn_matrix, input_lengths, output_lengths)
             # stop_token_loss = criterion(stop_preds, stop_tokens) * 50.0
-            lamda = 0.1
+            lamda = 0.2
             loss = mel_loss + post_mel_loss + lamda * total_attn_loss
             # + stop_token_loss
             test_loss += loss.item()
