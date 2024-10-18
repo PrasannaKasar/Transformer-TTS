@@ -20,7 +20,7 @@ def test(model, test_loader, writer, epoch):
     model.eval()
     test_loss = 0.0
     with torch.no_grad():
-        for i, data in enumerate(pbar):
+        for i, data in enumerate(test_loader):
             pbar.set_description("Processing at epoch %d"%epoch)
             global_step += 1
             if global_step < 400000:
@@ -84,7 +84,7 @@ def test(model, test_loader, writer, epoch):
             criterion = nn.BCEWithLogitsLoss()
             # attn_loss = guided_attention(attn_matrix, input_lengths, output_lengths)
             # stop_token_loss = criterion(stop_preds, stop_tokens) * 50.0
-            lamda = 0.2
+            lamda = 0.1
             loss = mel_loss + post_mel_loss + lamda * total_attn_loss
             # + stop_token_loss
             test_loss += loss.item()
