@@ -102,7 +102,7 @@ def main():
             total_attn_loss = 0.0
     
             # Guided attention: Compute attention loss for each example in the batch
-            for b in range(attn_matrix.size(0)):  # Iterate over batch size
+            for b in range(attn_matrix.size(0)//4):  # Iterate over batch size
                 # Get the true input and output lengths for this batch item
                 N = input_lengths[b].item()  # Input length (characters or phonemes)
                 T = output_lengths[b].item()  # Output length (mel frames)
