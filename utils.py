@@ -134,3 +134,16 @@ def guided_attention(N, T, g=0.2):
         for t_pos in range(W.shape[1]):
             W[n_pos, t_pos] = 1 - np.exp(-(t_pos / float(T) - n_pos / float(N)) ** 2 / (2 * g * g))
     return W
+
+def guided_attention_loss(attn_probs, input_lengths, output_lengths, sigma=0.2):
+    batch_size, output_seq_len, input_seq_len = attn_probs.size()
+    loss = 0.0
+    for b in range(batch_size):
+        T_x = input_lengths[b]
+        T_y = output_lengths[b]
+        grid_x, grid_y = torch.meshgrid(torch.arange(T_x), torch.arange(T_y))
+        W = 1.0 - torch.exp(-((grid_y.float() / T_y - grid_x.float() / T_x) ** 2) / (2 * sigma ** 2))
+        attn_slice = attn_probs[b, :T_y, :T_x]
+        loss += torch.mean(W.to(attn_slice.device) * attn_slice)
+    return loss / batch_size
+
